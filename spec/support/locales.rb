@@ -2,7 +2,7 @@
 
 require 'shoulda/matchers'
 
-AVAILABLE_TEST_LOCALES = LocaleSet.new("en-GB") #%w[ en-GB en fr de ])
+AVAILABLE_TEST_LOCALES = LocaleSet.new(["en-GB"]) #%w[ en-GB en fr de ])
 
 RSpec.configure do |config|
 
