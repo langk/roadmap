@@ -2,7 +2,7 @@
 
 require 'shoulda/matchers'
 
-AVAILABLE_TEST_LOCALES = LocaleSet.new(%w[ en-GB en fr de ])
+AVAILABLE_TEST_LOCALES = LocaleSet.new("en-GB") #%w[ en-GB en fr de ])
 
 RSpec.configure do |config|
 
@@ -17,8 +17,8 @@ RSpec.configure do |config|
 
   config.before(:each, type: :feature) do
     I18n.config.enforce_available_locales = true
-    I18n.config.locale = LocaleFormatter.new('en-GB', format: :i18n).to_s
-    FastGettext.locale = LocaleFormatter.new('en_GB', format: :fast_gettext).to_s
+    I18n.config.locale = LocaleFormatter.new(I18n.default_locale, format: :i18n).to_s
+    FastGettext.locale = LocaleFormatter.new(FastGettext.default_locale, format: :fast_gettext).to_s
   end
 
 end
