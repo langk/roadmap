@@ -1,23 +1,33 @@
 # frozen_string_literal: true
 
 # When Travis runs this, the DB isn't always built yet.
-if Language.table_exists?
+if Rails.env.test?
   def default_locale
-    Language.default.try(:abbreviation) || "en-GB"
+    "en-GB"
   end
 
   def available_locales
-    LocaleSet.new(
-      Language.sorted_by_abbreviation.pluck(:abbreviation).presence || [default_locale]
-    )
+    Rails.application.config.i18n.available_locales = LocaleSet.new(["en-GB"])
   end
 else
-  def default_locale
-    Rails.application.config.i18n.available_locales.first || "en-GB"
-  end
+  if Language.table_exists?
+    def default_locale
+      Language.default.try(:abbreviation) || "en-GB"
+    end
 
-  def available_locales
-    Rails.application.config.i18n.available_locales = LocaleSet.new(["en-GB", "en"])
+    def available_locales
+      LocaleSet.new(
+        Language.sorted_by_abbreviation.pluck(:abbreviation).presence || [default_locale]
+      )
+    end
+  else
+    def default_locale
+      Rails.application.config.i18n.available_locales.first || "en-GB"
+    end
+
+    def available_locales
+      Rails.application.config.i18n.available_locales = LocaleSet.new(["en-GB", "en"])
+    end
   end
 end
 
