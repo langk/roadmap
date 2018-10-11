@@ -2,6 +2,86 @@ require "data_cleanup"
 
 namespace :data_cleanup do
 
+  desc "Find blank required fields"
+  task :find_empty_required_fields => :environment do
+    DataCleanup.display "Checking for required field violations"
+    Dir[rule_paths].each do |rule_path|
+      load rule_path
+      klass_name = rule_path.split("rules/").last.gsub(".rb", '').classify
+      model, task = klass_name.split('::')
+      if task.to_s == "FixRequiredField"
+        rule_class = DataCleanup::Rules.const_get(klass_name)
+        rule       = rule_class.new(true)
+        DataCleanup.display rule.description
+        rule.call
+      end
+    end
+    DataCleanup.display "done ... please run `rake data_cleanup:clean_empty_required_fields` if there were any issues identified"
+  end
+
+  desc "Find orphaned records"
+  task :find_orphaned_records => :environment do
+    DataCleanup.display "Checking for orphaned records."
+    [Template, Phase, Section, Question, QuestionOption, Annotation, GuidanceGroup, Guidance,
+     Plan, Answer, Note, OrgIdentifier, UserIdentifier, Pref, Role].each do |klass|
+      klass_name = "DataCleanup::Rules::#{klass}::FixOrphans"
+      begin
+        rule = klass_name.constantize.new(true)
+        DataCleanup.display rule.description
+        rule.call
+      rescue NameError => ne
+        # The model has no FixOrphans
+
+      rescue Exception => e
+        p e.message
+
+      end
+    end
+    DataCleanup.display "done ... please run `rake data_cleanup:clean_orphaned_records` if there were any issues identified"
+  end
+
+  # TODO: Consolidate this with the corresponding find method .. its not DRY
+  #       only diff is the true value passed to rule_class.call()
+  desc "Clean up the blank required fields"
+  task :clean_empty_required_fields => :environment do
+    DataCleanup.display "Checking for required field violations"
+    Dir[rule_paths].each do |rule_path|
+      load rule_path
+      klass_name = rule_path.split("rules/").last.gsub(".rb", '').classify
+      model, task = klass_name.split('::')
+      if task.to_s == "FixRequiredField"
+        rule_class = DataCleanup::Rules.const_get(klass_name)
+        rule       = rule_class.new
+        DataCleanup.display rule.description
+        rule.call
+      end
+    end
+    DataCleanup.display "done"
+  end
+
+  # TODO: Consolidate this with the corresponding find method .. its not DRY
+  #       only diff is the true value passed to rule.call()
+  desc "Clean up orphaned records"
+  task :clean_orphaned_records => :environment do
+    DataCleanup.display "Checking for orphaned records."
+    [Template, Phase, Section, Question, QuestionOption, Annotation, GuidanceGroup, Guidance,
+     Plan, Answer, Note, OrgIdentifier, UserIdentifier, Pref, Role].each do |klass|
+      klass_name = "DataCleanup::Rules::#{klass}::FixOrphans"
+      begin
+        rule = klass_name.constantize.new
+        DataCleanup.display rule.description
+        rule.call
+      rescue NameError => ne
+        # The model has no FixOrphans
+
+      rescue Exception => e
+        p e.message
+
+      end
+    end
+    DataCleanup.display "done"
+  end
+
   desc "Check each record on the DB is valid and report"
   task :find_invalid_records => :environment do
     DataCleanup.logger.info("\n== Finding invalid records =======================\n")
@@ -19,20 +99,23 @@ namespace :data_cleanup do
       load rule_path
       klass_name = rule_path.split("rules/").last.gsub(".rb", '').classify
       model_name = klass_name.split("::").first
-      opt, models = ARGV[1].to_s.split("=")
-      if opt.present? && opt =='INCLUDE'
-        next unless model_name.in?(models.split(","))
-      elsif opt.present? && opt =='EXCLUDE'
-        next if model_name.in?(models.split(","))
-      elsif opt.blank?
-        # :noop:
-      else
-        raise ArgumentError, "Unknown option: #{opt}"
+
+      unless ["FixOrphans", "FixRequiredField"].include?(klass_name.split("::").last)
+        opt, models = ARGV[1].to_s.split("=")
+        if opt.present? && opt =='INCLUDE'
+          next unless model_name.in?(models.split(","))
+        elsif opt.present? && opt =='EXCLUDE'
+          next if model_name.in?(models.split(","))
+        elsif opt.blank?
+          # :noop:
+        else
+          raise ArgumentError, "Unknown option: #{opt}"
+        end
+        rule_class = DataCleanup::Rules.const_get(klass_name)
+        rule       = rule_class.new
+        puts rule.description
+        rule.call
       end
-      rule_class = DataCleanup::Rules.const_get(klass_name)
-      rule       = rule_class.new
-      puts rule.description
-      rule.call
     end
   end
 
