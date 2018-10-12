@@ -35,7 +35,7 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
     # Customise a Template that belongs to another funder Org
     click_link("Customisable Templates")
 
-    within "#template_2" do
+    within "#template_#{original_template.id}" do
       click_button "Actions"
       click_link "Customise"
     end
@@ -44,7 +44,7 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
     click_link "View all templates"
 
     # Publish our customisation
-    within "#template_2" do
+    within "#template_#{original_template.id}" do
       click_button "Actions"
       click_link "Publish"
     end
@@ -57,7 +57,7 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
     # Edit the original Template
     click_link "#{funder.name} Templates"
 
-    within "#template_2" do
+    within "#template_#{original_template.id}" do
       click_button "Actions"
       click_link "Edit"
     end
@@ -74,7 +74,7 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
     expect(latest_original_template.reload.sections).to have(3).items
     click_link "View all templates"
 
-    within "#template_4" do
+    within "#template_#{latest_original_template.id}" do
       click_button "Actions"
       click_link "Publish changes"
     end
@@ -87,7 +87,7 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
 
     click_link "Customisable Templates"
 
-    within "#template_4" do
+    within "#template_#{latest_original_template.id}" do
       click_button "Actions"
       click_link "Transfer customisation"
     end
