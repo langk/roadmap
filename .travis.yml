@@ -52,7 +52,7 @@ script:
 
 # Run these stages in this order:
 stages:
-  - security
+  # - security
   - test
   - hygiene
 
