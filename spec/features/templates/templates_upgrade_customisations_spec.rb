@@ -29,12 +29,6 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
   end
 
   scenario "Admin upgrades customizations from funder Template", :js do
-    Capybara.reset_sessions!
-    puts "I18n.default_locale       : #{I18n.default_locale       }"
-    puts "FastGettext.default_locale: #{FastGettext.default_locale}"
-    puts "I18n.locale       : #{I18n.locale       }"
-    puts "FastGettext.locale: #{FastGettext.locale}"
-
     sign_in user
     visit org_admin_templates_path
 
