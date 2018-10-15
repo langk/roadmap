@@ -46,8 +46,9 @@ RSpec.feature "Annotations::Editing", type: :feature do
     within("fieldset#fields_annotation_2") do
       tinymce_fill_in("question_annotations_attributes_annotation_2_text", with: "Noo bar")
     end
+    question = Question.last
     # NOTE: This is question 2, since Annotation was copied upon clicking "Customise"
-    within('#edit_question_2') do
+    within("#edit_question_#{question.id + 1}") do
       # Expect it to destroy the newly cleared Annotation
       expect { click_button 'Save' }.not_to change { Annotation.count }
     end
@@ -64,12 +65,11 @@ RSpec.feature "Annotations::Editing", type: :feature do
     expect {
       click_link "Customise"
     }.to change { Template.count }.by(1)
-
     click_link "Customise phase"
     click_link section.title
     # NOTE: This is annotation 2, since Annotation was copied upon clicking "Customise"
     within("fieldset#fields_annotation_2") do
-      tinymce_fill_in("question_annotations_attributes_annotation_2_text", with: "")
+      tinymce_fill_in("question_annotations_attributes_annotation_#{Question.last.id + 1}_text", with: " ")
     end
     # NOTE: This is question 2, since Annotation was copied upon clicking "Customise"
     within('#edit_question_2') do
