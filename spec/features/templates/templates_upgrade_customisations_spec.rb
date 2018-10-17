@@ -39,12 +39,12 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
       click_button "Actions"
       click_link "Customise"
     end
-
+    new_original_template = Template.latest_version(original_template.family_id).first
 
     click_link "View all templates"
 
     # Publish our customisation
-    within "#template_#{original_template.id}" do
+    within "#template_#{new_original_template.id}" do
       click_button "Actions"
       click_link "Publish"
     end
@@ -57,12 +57,12 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
     # Edit the original Template
     click_link "#{funder.name} Templates"
 
-    within "#template_#{original_template.id}" do
+    within "#template_#{new_original_template.id}" do
       click_button "Actions"
       click_link "Edit"
     end
 
-    click_link(original_template.phases.first.title)
+    click_link(new_original_template.phases.first.title)
 
     click_link "Add a new section"
     within('#new_section_new_section') do
@@ -70,11 +70,11 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
       tinymce_fill_in :new_section_section_description, with: "New section title"
       click_button("Save")
     end
-    latest_original_template = Template.last
-    expect(latest_original_template.reload.sections).to have(3).items
+    new_original_template = Template.latest_version(original_template.family_id).first
+    expect(new_original_template.sections).to have(3).items
     click_link "View all templates"
 
-    within "#template_#{latest_original_template.id}" do
+    within "#template_#{new_original_template.id}" do
       click_button "Actions"
       click_link "Publish changes"
     end
@@ -87,14 +87,14 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
 
     click_link "Customisable Templates"
 
-    within "#template_#{latest_original_template.id}" do
+    within "#template_#{new_original_template.id}" do
       click_button "Actions"
       click_link "Transfer customisation"
     end
     expect(page).to have_text("Customisations are published")
     latest_template = Template.last
     expect(latest_template.reload.sections).to have(3).items
-    expect(latest_original_template.reload.sections).to have(3).items
+    expect(new_original_template.reload.sections).to have(3).items
     expect(original_template.sections).to have(2).items
     expect(template.sections).to have(2).items
   end
