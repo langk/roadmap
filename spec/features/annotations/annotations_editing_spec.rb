@@ -44,9 +44,8 @@ RSpec.feature "Annotations::Editing", type: :feature do
 
     click_link section.title
 
-    # NOTE: This is annotation 2, since Annotation was copied upon clicking "Customise"
-    within("fieldset#fields_annotation_2") do
-      tinymce_fill_in("question_annotations_attributes_annotation_2_text", with: "Noo bar")
+    within("fieldset#fields_annotation_#{template.annotation_ids.last}") do
+      tinymce_fill_in("question_annotations_attributes_annotation_#{template.annotation_ids.last}_text", with: "Noo bar")
     end
     question = Question.last
     # NOTE: This is question 2, since Annotation was copied upon clicking "Customise"
