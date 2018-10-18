@@ -13,8 +13,6 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
            org: funder, title: "Funder Template")
   end
 
-  let(:customized_template) { funder_template.customize!(org) }
-
   before do
     create_list(:phase, 1, template: funder_template).each do |phase|
       create_list(:section, 2, phase: phase).each do |section|
@@ -34,20 +32,16 @@ RSpec.feature "Templates::UpgradeCustomisations", type: :feature do
     # Customise a Template that belongs to another funder Org
     click_link("Customisable Templates")
 
-    within "#template_#{funder_template.id}" do
-      click_button "Actions"
-      click_link "Customise"
-    end
+    click_button "Actions"
+    expect { click_link "Customise" }.to change { Template.count }.by(1)
+
+    customized_template = Template.last
 
     click_link "View all templates"
 
     # Publish our customisation
-    within "#template_#{funder_template.id}" do
-      click_button "Actions"
-      click_link "Publish"
-    end
-
-    new_funder_template = Template.last
+    click_button "Actions"
+    click_link "Publish"
 
     # Move to the other funder Org's Templates
     fill_in(:superadmin_user_org_name, with: funder.name)
